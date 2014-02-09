@@ -72,7 +72,8 @@ public class Pyramid extends AbstractSimpleBase {
 		};
 		spShader = new ShaderProgram("pyramide");
 
-		
+		mvp = new Matrix4f();
+
 		FloatBuffer edgeBuffer = BufferUtils.createFloatBuffer(ecken.length);
         edgeBuffer.put(ecken);
         edgeBuffer.flip();
@@ -131,28 +132,25 @@ public class Pyramid extends AbstractSimpleBase {
         glBindAttribLocation(spShader.getId(), 1, "texUv");
         glUseProgram(0);
 	}
-	
 	@Override
 	protected void render() {
-		mvp = new Matrix4f(projection1);
-		mvp.translate(new Vector3f(0,-5f,-50f));
-		mvp.rotate(2, new Vector3f(1,0,0));
+		glUseProgram(spShader.getId());
 		glClear(GL_COLOR_BUFFER_BIT);
-		;
 		//Draw Object
 		glBindVertexArray(vaoId);
-		
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
-		glDrawArrays(GL_TRIANGLES,0,ecken.length/3);
+		glDrawArrays(GL_QUADS,0,ecken.length/3);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
 		glBindVertexArray(0);
-		
 		FloatBuffer fbM = BufferUtils.createFloatBuffer(16);
 		mvp.store(fbM);
 		fbM.flip();
+		glUseProgram(spShader.getId());
 		glUniformMatrix4(glGetUniformLocation(spShader.getId(), "frustMatrix"), false, fbM);
+		//glUniformMatrix4(glGetUniformLocation(spShader.getId(), "frustMatrix"), false, fbM);
+		glUseProgram(0);
 	}
 
 	@Override

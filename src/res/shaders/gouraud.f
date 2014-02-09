@@ -5,5 +5,10 @@ out vec4 farbe;
 uniform sampler2D textureSampler;
  
  void main(void){
-  	farbe = texture(textureSampler, texToFrag);	
+ 	if(mod(texToFrag.x, 5) == 0){
+ 		farbe = texture(textureSampler, texToFrag);
+ 	}
+ 	else{
+  		farbe = texture(textureSampler, texToFrag);	
+  	}
  }
