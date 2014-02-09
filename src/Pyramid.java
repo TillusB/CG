@@ -18,8 +18,8 @@ public class Pyramid extends AbstractSimpleBase {
 	Matrix4f projection1 = new Matrix4f();
 	public Matrix4f mvp;		
 	int vaoId, vboIdE, vboIdT;
-	private Texture camo;
-	private ShaderProgram spGrouaud;
+	private Texture texture;
+	private ShaderProgram spShader;
 	
 	
 	
@@ -70,7 +70,8 @@ public class Pyramid extends AbstractSimpleBase {
 				-size*5,0,-size*5,
 				size*5,0,-size*5
 		};
-		
+		spShader = new ShaderProgram("pyramide");
+
 		
 		FloatBuffer edgeBuffer = BufferUtils.createFloatBuffer(ecken.length);
         edgeBuffer.put(ecken);
@@ -108,7 +109,7 @@ public class Pyramid extends AbstractSimpleBase {
         FloatBuffer uvBuffer = BufferUtils.createFloatBuffer(texUv.length);
         uvBuffer.put(texUv);
         uvBuffer.flip();
-
+        glUseProgram(spShader.getId());
         vaoId = glGenVertexArrays();
         glBindVertexArray(vaoId);
 
@@ -125,22 +126,17 @@ public class Pyramid extends AbstractSimpleBase {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-		camo = new Texture("rosa_camouflage.jpg");
-		spGrouaud = new ShaderProgram("pyramide");
-		glUseProgram(spGrouaud.getId());
-		glBindAttribLocation(spGrouaud.getId(), 0, "ecken");
-        glBindAttribLocation(spGrouaud.getId(), 1, "texUv");
-
-		glUseProgram(0);
+		texture = new Texture("rosa_camouflage.jpg");
+		glBindAttribLocation(spShader.getId(), 0, "ecken");
+        glBindAttribLocation(spShader.getId(), 1, "texUv");
+        glUseProgram(0);
 	}
-	
-	long lastTime = Sys.getTime();
-	float w = 0;
 	
 	@Override
 	protected void render() {
 		mvp = new Matrix4f(projection1);
-		mvp.translate(new Vector3f(0,-5,-50f));		
+		mvp.translate(new Vector3f(0,-5f,-50f));
+		mvp.rotate(2, new Vector3f(1,0,0));
 		glClear(GL_COLOR_BUFFER_BIT);
 		;
 		//Draw Object
@@ -156,7 +152,7 @@ public class Pyramid extends AbstractSimpleBase {
 		FloatBuffer fbM = BufferUtils.createFloatBuffer(16);
 		mvp.store(fbM);
 		fbM.flip();
-		glUniformMatrix4(glGetUniformLocation(spGrouaud.getId(), "frustMatrix"), false, fbM);
+		glUniformMatrix4(glGetUniformLocation(spShader.getId(), "frustMatrix"), false, fbM);
 	}
 
 	@Override
@@ -185,13 +181,15 @@ public class Pyramid extends AbstractSimpleBase {
 		projection1.m32 = D;
 		
 		projection1.m23 = -1;
-		glBindAttribLocation(spGrouaud.getId(), 0, "ecken");
-		glBindAttribLocation(spGrouaud.getId(), 1, "texUv");
-		glLinkProgram(spGrouaud.getId());
-		glUseProgram(spGrouaud.getId());
+		glUseProgram(spShader.getId());
+		glBindAttribLocation(spShader.getId(), 0, "ecken");
+		glBindAttribLocation(spShader.getId(), 1, "texUv");
+		glLinkProgram(spShader.getId());
+		glUseProgram(spShader.getId());
 		glEnable(GL_CULL_FACE);
 		//glEnable(GL_DEPTH_TEST);
-		glShadeModel(GL_SMOOTH);		
+		glShadeModel(GL_SMOOTH);
+		glUseProgram(0);
 	}
 	
 }

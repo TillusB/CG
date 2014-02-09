@@ -61,7 +61,6 @@ public class Example extends AbstractSimpleBase {
 		
 		projection.m23 = -1;
 				
-		wuerfel(4);
 		spGouraud = new ShaderProgram("gouraud");
 		glBindAttribLocation(spGouraud.getId(), 0, "ecken");
 		glLinkProgram(spGouraud.getId());
@@ -70,15 +69,16 @@ public class Example extends AbstractSimpleBase {
 		//glEnable(GL_DEPTH_TEST);
 		glShadeModel(GL_SMOOTH);
 		
-		/*tetraeder();
-		spShader = new ShaderProgram("shader");
-		glBindAttribLocation(spShader.getId(), 0, "ecken");
-		glLinkProgram(spShader.getId());
-		glUseProgram(spShader.getId());
-						
+		spShader = new ShaderProgram("pyramide");
+		glBindAttribLocation(spGouraud.getId(), 0, "ecken");
+		glLinkProgram(spGouraud.getId());
+		glUseProgram(spGouraud.getId());
 		glEnable(GL_CULL_FACE);
 		//glEnable(GL_DEPTH_TEST);
-		glShadeModel(GL_SMOOTH);*/
+		glShadeModel(GL_SMOOTH);
+		
+		wuerfel(4);
+
 	}
 
 	/*
@@ -180,11 +180,14 @@ public class Example extends AbstractSimpleBase {
 		texBuffer.put(texture);
 		texBuffer.flip();
 		
+		glUseProgram(spGouraud.getId());
 		vboIdC = glGenBuffers();
 		glBindBuffer(GL_ARRAY_BUFFER, vboIdC);
 		glBufferData(GL_ARRAY_BUFFER, texBuffer, GL_STATIC_DRAW);
 		glVertexAttribPointer(1,2,GL_FLOAT,false,0,0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);	}
+		glBindBuffer(GL_ARRAY_BUFFER, 0);	
+		glUseProgram(0);
+	}
 	
 	long lastTime = Sys.getTime();
 	float w = 0;
@@ -193,7 +196,9 @@ public class Example extends AbstractSimpleBase {
 	float height = 0;
 	@Override
 	protected void render() {
+		glUseProgram(spShader.getId());
 		p.render();
+		glUseProgram(0);
 		mvp = new Matrix4f(projection);
 		mvp.translate(new Vector3f(0,-5,-50f));
 		long t = Sys.getTime();
@@ -225,6 +230,7 @@ public class Example extends AbstractSimpleBase {
 		w += 0.3 * diff/1000f;
 		lastTime = t;
 		//Draw Object
+		glUseProgram(spGouraud.getId());
 		glBindVertexArray(vaoId);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
@@ -232,11 +238,13 @@ public class Example extends AbstractSimpleBase {
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
 		glBindVertexArray(0);
-		
+		glUseProgram(0);
 		FloatBuffer fbM = BufferUtils.createFloatBuffer(16);
 		mvp.store(fbM);
 		fbM.flip();
+		glUseProgram(spGouraud.getId());
 		glUniformMatrix4(glGetUniformLocation(spGouraud.getId(), "frustMatrix"), false, fbM);
 		//glUniformMatrix4(glGetUniformLocation(spShader.getId(), "frustMatrix"), false, fbM);
+		glUseProgram(0);
 	}
 }
